@@ -4,4 +4,6 @@
     <string name="latest">Последние</string>
     <string name="best">Лучшие</string>
     <string name="hot">Горячие</string>
+    <string name="error">Произошла ошибка во время загрузки данных</string>
+    <string name="repeat">Повторить</string>
 </resources>

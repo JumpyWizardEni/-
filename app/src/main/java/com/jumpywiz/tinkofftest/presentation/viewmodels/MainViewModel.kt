@@ -38,4 +38,11 @@ class MainViewModel @Inject constructor(private val repos: MainRepository): View
 
         }
     }
+
+    fun loadCurrent() {
+        viewModelScope.launch{
+            data.value = repos.getNext(current)
+            Log.d("MainViewModel", "current = $current, cached = $cached")
+        }
+    }
 }

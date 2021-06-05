@@ -30,4 +30,5 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
         val data = gifDao.getGif(current)
         return TransactionHelper.entityToGif(data)
     }
+
 }

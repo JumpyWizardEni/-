@@ -1,5 +1,6 @@
 package com.jumpywiz.tinkofftest.presentation.ui
 
+import android.graphics.drawable.Drawable
 import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -14,9 +15,15 @@ import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.jumpywiz.tinkofftest.Application
 import com.jumpywiz.tinkofftest.R
 import com.jumpywiz.tinkofftest.helpers.GlideApp
+import com.jumpywiz.tinkofftest.model.Gif
 import com.jumpywiz.tinkofftest.model.Source
 import com.jumpywiz.tinkofftest.presentation.viewmodels.MainViewModel
 import java.io.File
@@ -31,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var latestButton: Button
     private lateinit var bestButton: Button
     private lateinit var hotButton: Button
+    private lateinit var repeatButton: Button
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
 
@@ -51,30 +59,25 @@ class MainActivity : AppCompatActivity() {
         hotButton = findViewById(R.id.hotButton)
         nextButton = findViewById(R.id.nextButton)
         prevButton = findViewById(R.id.prevButton)
-
+        repeatButton = findViewById(R.id.repeatButton)
 
         showDownload()
+
         mainViewModel =
             ViewModelProvider(
                 this,
                 viewModelFactory
             ).get(MainViewModel::class.java)
+
         mainViewModel.getData().observe(this, Observer {
             if (it == null) {//Some problem happened, show error message
                 Log.e("Error at MainActivity", "Null received")
                 showErrorMessage()
             } else {//Data is successfully fetched
                 when (it.source) {
-                    Source.NET -> GlideApp.with(applicationContext).asGif().load(it.gifURL)
-                        .into(gifView)
-                    Source.DB -> {
-                        GlideApp.with(applicationContext).asGif().load(it.gifURL)
-                            .onlyRetrieveFromCache(true)
-                            .error(GlideApp.with(applicationContext).asGif().load(it.gifURL))
-                            .into(gifView)
-                    }
+                    Source.NET -> glideLoadNet(it)
+                    Source.DB -> glideLoadDb(it)
                 }
-                bottomText.text = it.label
                 prevButton.isEnabled = it.id > 1
                 restoreImage()
             }
@@ -109,24 +112,98 @@ class MainActivity : AppCompatActivity() {
             mainViewModel.loadPrev()
             showDownload()
         }
+
+        repeatButton.setOnClickListener {
+            mainViewModel.loadCurrent()
+            showDownload()
+        }
     }
 
     fun showErrorMessage() {
         errorText.visibility = View.VISIBLE
-        bottomText.visibility = View.GONE
+        bottomText.text = ""
         gifView.visibility = View.GONE
+        repeatButton.visibility = View.VISIBLE
     }
 
     fun restoreImage() {
         errorText.visibility = View.GONE
-        bottomText.visibility = View.VISIBLE
         gifView.visibility = View.VISIBLE
+        repeatButton.visibility = View.GONE
     }
 
     fun showDownload() {
         errorText.visibility = View.INVISIBLE
-        bottomText.visibility = View.INVISIBLE
+        bottomText.text = ""
         gifView.visibility = View.INVISIBLE
+        repeatButton.visibility = View.GONE
     }
 
+    fun glideLoadDb(gif: Gif?) {
+        GlideApp.with(applicationContext).asGif().load(gif!!.gifURL)
+            .listener(object : RequestListener<GifDrawable> {
+                override fun onResourceReady(
+                    resource: GifDrawable?,
+                    model: Any?,
+                    target: Target<GifDrawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    runOnUiThread {
+                        restoreImage()
+                        bottomText.text = gif.label
+                    }
+                    return false
+                }
+
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<GifDrawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    runOnUiThread {
+                        showErrorMessage()
+                    }
+                    return false
+                }
+            })
+            .onlyRetrieveFromCache(true)
+            .into(gifView)
+    }
+
+    fun glideLoadNet(gif: Gif?) {
+
+        GlideApp.with(applicationContext).asGif().load(gif!!.gifURL)
+            .listener(object : RequestListener<GifDrawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<GifDrawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    runOnUiThread {
+                        showErrorMessage()
+
+                    }
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: GifDrawable?,
+                    model: Any?,
+                    target: Target<GifDrawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    runOnUiThread {
+                        restoreImage()
+                        bottomText.text = gif.label
+                    }
+                    return false
+                }
+
+            })
+            .into(gifView)
+    }
 }
