@@ -4,6 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginBottom="30dp"
+    android:backgroundTint="@color/purple_200"
+    android:backgroundTintMode="src_in"
+    android:foregroundTint="@color/purple_200"
+    android:foregroundTintMode="src_in"
     tools:context=".presentation.ui.MainActivity">
 
     <LinearLayout
@@ -25,13 +30,26 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_person_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/textView2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
+                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/developers_life"
-                android:textSize="50sp"
+                android:textColor="@color/black"
+                android:textSize="40sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageView"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -47,39 +65,73 @@
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="400dp"
+                android:layout_height="400dp"
                 app:cardCornerRadius="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <ImageView
-                    android:id="@+id/imageView"
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_launcher_background"
-                    tools:layout_editor_absoluteX="149dp"
-                    tools:layout_editor_absoluteY="195dp" />
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/errorText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="TextView" />
+
+                    <ImageView
+                        android:id="@+id/gifView"
+                        android:layout_width="400dp"
+                        android:layout_height="400dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_launcher_background"
+                        tools:layout_editor_absoluteX="149dp"
+                        tools:layout_editor_absoluteY="195dp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true">
+
+                        <TextView
+                            android:id="@+id/bottomText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp" />
+                    </LinearLayout>
+                </RelativeLayout>
+
             </androidx.cardview.widget.CardView>
 
             <Button
                 android:id="@+id/latestButton"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:backgroundTint="@color/white"
                 android:text="@string/latest"
+                android:textColor="@drawable/menu_button_style"
                 app:layout_constraintEnd_toStartOf="@+id/bestButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/bestButton"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:backgroundTint="@color/white"
                 android:text="@string/best"
+                android:textColor="@drawable/menu_button_style"
                 app:layout_constraintBottom_toTopOf="@+id/cardView"
                 app:layout_constraintEnd_toEndOf="@+id/cardView"
                 app:layout_constraintStart_toStartOf="@+id/cardView"
@@ -87,15 +139,43 @@
 
             <Button
                 android:id="@+id/hotButton"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:backgroundTint="@color/white"
                 android:text="@string/hot"
+                android:textColor="@drawable/menu_button_style"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bestButton"
                 app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/nextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/post_switch_button_style"
+        android:src="@drawable/ic_baseline_navigate_next_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/prevButton"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+    <ImageButton
+        android:id="@+id/prevButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/post_switch_button_style"
+        android:clickable="false"
+        android:src="@drawable/ic_baseline_navigate_before_24"
+        android:text="Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/nextButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
