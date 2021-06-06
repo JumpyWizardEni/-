@@ -4,6 +4,7 @@ import com.jumpywiz.tinkofftest.model.Gif
 import com.jumpywiz.tinkofftest.model.GifEntity
 import com.jumpywiz.tinkofftest.model.Result
 import com.jumpywiz.tinkofftest.model.Source
+import com.jumpywiz.tinkofftest.presentation.ui.State
 
 class TransactionHelper {
     companion object{
@@ -18,14 +19,14 @@ class TransactionHelper {
             if (data == null) {
                 return null
             }
-            return Gif(data.gifURL, Source.DB, data.label, data.id)
+            return Gif(data.gifURL, Source.DB, data.label, data.position)
         }
 
-        fun resultToEntity(r: Result?, id: Int): GifEntity? {
+        fun resultToEntity(r: Result?, pos: Int, state: State): GifEntity? {
             if (r == null) {
                 return null
             }
-            return GifEntity(r.gifURL, r.description, id)
+            return GifEntity(r.gifURL, r.description, pos, state)
         }
     }
 }

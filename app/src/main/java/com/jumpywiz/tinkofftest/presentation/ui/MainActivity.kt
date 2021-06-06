@@ -1,16 +1,12 @@
 package com.jumpywiz.tinkofftest.presentation.ui
 
-import android.graphics.drawable.Drawable
-import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.lifecycle.Observer
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -23,7 +19,6 @@ import com.jumpywiz.tinkofftest.helpers.GlideApp
 import com.jumpywiz.tinkofftest.model.Gif
 import com.jumpywiz.tinkofftest.model.Source
 import com.jumpywiz.tinkofftest.presentation.viewmodels.MainViewModel
-import java.io.File
 import javax.inject.Inject
 
 
@@ -39,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var progressBar: ProgressBar
+    private var currentPressed = State.RANDOM
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -77,6 +73,7 @@ class MainActivity : AppCompatActivity() {
                     Source.NET -> glideLoad(it, false)
                     Source.DB -> glideLoad(it, true)
                 }
+                Log.d("MainActivity", "data = $it")
                 prevButton.isEnabled = it.id > 1
             }
         })
@@ -85,35 +82,70 @@ class MainActivity : AppCompatActivity() {
             hotButton.isActivated = !hotButton.isActivated
             bestButton.isActivated = false
             latestButton.isActivated = false
-
+            when (hotButton.isActivated) {
+                true -> {
+                    mainViewModel.loadCurrent(State.HOT)
+                    showDownload()
+                    currentPressed = State.HOT
+                }
+                false -> {
+                    mainViewModel.loadCurrent(State.RANDOM)
+                    showDownload()
+                    currentPressed = State.RANDOM
+                }
+            }
         }
 
         bestButton.setOnClickListener {
             hotButton.isActivated = false
             bestButton.isActivated = !bestButton.isActivated
             latestButton.isActivated = false
+            when (bestButton.isActivated) {
+                true -> {
+                    mainViewModel.loadCurrent(State.BEST)
+                    showDownload()
+                    currentPressed = State.BEST
+                }
+                false -> {
+                    mainViewModel.loadCurrent(State.RANDOM)
+                    showDownload()
+                    currentPressed = State.RANDOM
+                }
+            }
         }
 
         latestButton.setOnClickListener {
             hotButton.isActivated = false
             bestButton.isActivated = false
             latestButton.isActivated = !latestButton.isActivated
+            when (latestButton.isActivated) {
+                true -> {
+                    mainViewModel.loadCurrent(State.LATEST)
+                    showDownload()
+                    currentPressed = State.LATEST
+                }
+                false -> {
+                    mainViewModel.loadCurrent(State.RANDOM)
+                    showDownload()
+                    currentPressed = State.RANDOM
+                }
+            }
         }
 
         nextButton.setOnClickListener {
             Log.d("MainActivity", "Next button pressed")
-            mainViewModel.loadNext()
+            mainViewModel.loadNext(currentPressed)
             showDownload()
         }
 
         prevButton.setOnClickListener {
             Log.d("MainActivity", "Previous button pressed")
-            mainViewModel.loadPrev()
+            mainViewModel.loadPrev(currentPressed)
             showDownload()
         }
 
         repeatButton.setOnClickListener {
-            mainViewModel.loadCurrent()
+            mainViewModel.loadCurrent(currentPressed)
             showDownload()
         }
     }
