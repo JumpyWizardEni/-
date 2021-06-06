@@ -82,21 +82,22 @@ class MainActivity : AppCompatActivity() {
         })
 
         hotButton.setOnClickListener {
-            hotButton.isEnabled = false
-            bestButton.isEnabled = true
-            latestButton.isEnabled = true
+            hotButton.isActivated = !hotButton.isActivated
+            bestButton.isActivated = false
+            latestButton.isActivated = false
+
         }
 
         bestButton.setOnClickListener {
-            hotButton.isEnabled = true
-            bestButton.isEnabled = false
-            latestButton.isEnabled = true
+            hotButton.isActivated = false
+            bestButton.isActivated = !bestButton.isActivated
+            latestButton.isActivated = false
         }
 
         latestButton.setOnClickListener {
-            hotButton.isEnabled = true
-            bestButton.isEnabled = true
-            latestButton.isEnabled = false
+            hotButton.isActivated = false
+            bestButton.isActivated = false
+            latestButton.isActivated = !latestButton.isActivated
         }
 
         nextButton.setOnClickListener {
@@ -170,6 +171,7 @@ class MainActivity : AppCompatActivity() {
                     return false
                 }
             })
+            .centerCrop()
             .into(gifView)
     }
 
