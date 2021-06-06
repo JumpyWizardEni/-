@@ -1,30 +1,31 @@
 package com.jumpywiz.tinkofftest.repository
 
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import com.jumpywiz.tinkofftest.db.GifDao
 import com.jumpywiz.tinkofftest.helpers.TransactionHelper
 import com.jumpywiz.tinkofftest.model.Gif
-import com.jumpywiz.tinkofftest.model.GifEntity
 import com.jumpywiz.tinkofftest.model.RequestAnswer
 import com.jumpywiz.tinkofftest.model.Result
 import com.jumpywiz.tinkofftest.net.RetrofitService
 import com.jumpywiz.tinkofftest.presentation.ui.State
-import retrofit2.Call
-import retrofit2.Callback;
-import retrofit2.Response
 
-class MainRepository(private val gifDao: GifDao, private val retrofitService: RetrofitService) {
+open class MainRepository(
+    private val gifDao: GifDao,
+    private val retrofitService: RetrofitService
+) {
 
-    private var cachedResult: MutableMap<State, RequestAnswer?> =
-        mutableMapOf(State.HOT to null, State.BEST to null, State.LATEST to null)
+    private var cachedResult = mutableMapOf(
+        State.HOT to RequestAnswer(listOf(), 0),
+        State.BEST to RequestAnswer(listOf(), 0),
+        State.LATEST to RequestAnswer(listOf(), 0)
+    )
 
     private var currentPosInPage: MutableMap<State, Int> =
         mutableMapOf(State.HOT to 0, State.BEST to 0, State.LATEST to 0)
     private var currentPage: MutableMap<State, Int> =
         mutableMapOf(State.HOT to 0, State.BEST to 0, State.LATEST to 0)
 
-    suspend fun getNext(current: Int, latest: Int, state: State, cached: Boolean = true): Gif? {
+    open suspend fun getNext(current: Int, latest: Int, state: State, cached: Boolean = true): Gif? {
         when (state) {
             State.RANDOM -> {
                 val cachedData = getCached(current, state)
@@ -42,7 +43,7 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
                 return TransactionHelper.resultToGif(data, current)
             }
             State.HOT, State.BEST, State.LATEST -> {
-                if (cachedResult[state] == null) {
+                if (cachedResult[state]!!.result.size == 0) {
                     Log.d("MainRepository", "downloadNewPage call")
                     return downloadNewPage(current, state)
                 } else {
@@ -82,7 +83,7 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
         }
     }
 
-    suspend fun getCached(current: Int, state: State): Gif? {
+    open suspend fun getCached(current: Int, state: State): Gif? {
         val data = gifDao.getGif(current, state)
         return TransactionHelper.entityToGif(data)
     }
@@ -96,7 +97,7 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
             )
         } catch (exception: java.net.SocketTimeoutException) {//No Internet
         }
-        cachedResult[state] = data
+        cachedResult[state] = data!!
 
         if (data != null) {
             gifDao.insertEntry(

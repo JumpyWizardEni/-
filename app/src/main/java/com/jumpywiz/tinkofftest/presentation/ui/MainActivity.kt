@@ -1,13 +1,12 @@
 package com.jumpywiz.tinkofftest.presentation.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.gif.GifDrawable
@@ -17,7 +16,6 @@ import com.jumpywiz.tinkofftest.Application
 import com.jumpywiz.tinkofftest.R
 import com.jumpywiz.tinkofftest.helpers.GlideApp
 import com.jumpywiz.tinkofftest.model.Gif
-import com.jumpywiz.tinkofftest.model.Source
 import com.jumpywiz.tinkofftest.presentation.viewmodels.MainViewModel
 import javax.inject.Inject
 
@@ -51,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun showErrorMessage() {
+    private fun showErrorMessage() {
         errorText.visibility = View.VISIBLE
         bottomText.text = ""
         gifView.visibility = View.GONE
@@ -59,14 +57,14 @@ class MainActivity : AppCompatActivity() {
         progressBar.visibility = View.GONE
     }
 
-    fun restoreImage() {
+    private fun restoreImage() {
         errorText.visibility = View.GONE
         gifView.visibility = View.VISIBLE
         repeatButton.visibility = View.GONE
         progressBar.visibility = View.GONE
     }
 
-    fun showDownload() {
+    private fun showDownload() {
         progressBar.visibility = View.VISIBLE
         errorText.visibility = View.GONE
         bottomText.text = ""
@@ -74,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         repeatButton.visibility = View.GONE
     }
 
-    fun initComponents() {
+    private fun initComponents() {
         gifView = findViewById(R.id.gifView)
         bottomText = findViewById(R.id.bottomText)
         errorText = findViewById(R.id.errorText)
@@ -94,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             ).get(MainViewModel::class.java)
     }
 
-    fun setButtonListeners() {
+    private fun setButtonListeners() {
 
         hotButton.setOnClickListener {
             hotButton.isActivated = !hotButton.isActivated
@@ -168,7 +166,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setViewModelObserver() {
+    private fun setViewModelObserver() {
         mainViewModel.getData().observe(this, Observer {
             if (it == null) {//Some problem happened, show error message
                 Log.e("Error at MainActivity", "Null received")
@@ -181,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun glideLoad(gif: Gif?) {
+    private fun glideLoad(gif: Gif?) {
         GlideApp.with(applicationContext).asGif().load(gif!!.gifURL)
             .onlyRetrieveFromCache(false).listener(object : RequestListener<GifDrawable> {
                 override fun onResourceReady(

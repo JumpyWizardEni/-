@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.jumpywiz.tinkofftest.presentation.viewmodels.MainViewModel
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoMap
 
 @Module

@@ -1,11 +1,11 @@
 package com.jumpywiz.tinkofftest
 
 import android.app.Application
-import com.jumpywiz.tinkofftest.db.GifDao
 import com.jumpywiz.tinkofftest.db.MainDatabase
 import com.jumpywiz.tinkofftest.di.*
-import kotlinx.coroutines.*
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class Application : Application() {
 

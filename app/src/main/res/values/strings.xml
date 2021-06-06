@@ -6,4 +6,8 @@
     <string name="hot">Горячие</string>
     <string name="error">Произошла ошибка во время загрузки данных</string>
     <string name="repeat">Повторить</string>
+    <string name="gifViewDescription">GifView</string>
+    <string name="accountDescription">Account</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
 </resources>

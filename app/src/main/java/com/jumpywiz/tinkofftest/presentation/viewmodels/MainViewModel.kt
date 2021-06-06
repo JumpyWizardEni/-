@@ -1,13 +1,19 @@
 package com.jumpywiz.tinkofftest.presentation.viewmodels
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jumpywiz.tinkofftest.model.Gif
-import com.jumpywiz.tinkofftest.model.RequestAnswer
 import com.jumpywiz.tinkofftest.presentation.ui.State
 import com.jumpywiz.tinkofftest.repository.MainRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.MutableList
+import kotlin.collections.MutableMap
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 
 class MainViewModel @Inject constructor(private val repos: MainRepository) : ViewModel() {
     private var data: MutableLiveData<Gif?> = MutableLiveData()
@@ -24,7 +30,7 @@ class MainViewModel @Inject constructor(private val repos: MainRepository) : Vie
     }
 
     fun getData() = data
-    fun loadNext(state: State) {
+    fun loadNext(state: State){
         viewModelScope.launch {
             if (stateMap[state]!![0] >= stateMap[state]!![1]) {
                 data.value = repos.getNext(stateMap[state]!![0] + 1, stateMap[state]!![0] + 1, state)
@@ -60,5 +66,9 @@ class MainViewModel @Inject constructor(private val repos: MainRepository) : Vie
                 "loadCurrent: current = ${stateMap[state]!![0]}, cached = ${stateMap[state]!![1]}"
             )
         }
+    }
+
+    fun setData(gif: Gif?) {
+        data.value = gif
     }
 }
