@@ -6,10 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
@@ -41,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var repeatButton: Button
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
+    private lateinit var progressBar: ProgressBar
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -60,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         nextButton = findViewById(R.id.nextButton)
         prevButton = findViewById(R.id.prevButton)
         repeatButton = findViewById(R.id.repeatButton)
+        progressBar = findViewById(R.id.progressBar)
 
         showDownload()
 
@@ -75,11 +74,10 @@ class MainActivity : AppCompatActivity() {
                 showErrorMessage()
             } else {//Data is successfully fetched
                 when (it.source) {
-                    Source.NET -> glideLoadNet(it)
-                    Source.DB -> glideLoadDb(it)
+                    Source.NET -> glideLoad(it, false)
+                    Source.DB -> glideLoad(it, true)
                 }
                 prevButton.isEnabled = it.id > 1
-                restoreImage()
             }
         })
 
@@ -124,24 +122,27 @@ class MainActivity : AppCompatActivity() {
         bottomText.text = ""
         gifView.visibility = View.GONE
         repeatButton.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
     }
 
     fun restoreImage() {
         errorText.visibility = View.GONE
         gifView.visibility = View.VISIBLE
         repeatButton.visibility = View.GONE
+        progressBar.visibility = View.GONE
     }
 
     fun showDownload() {
-        errorText.visibility = View.INVISIBLE
+        progressBar.visibility = View.VISIBLE
+        errorText.visibility = View.GONE
         bottomText.text = ""
-        gifView.visibility = View.INVISIBLE
+        gifView.visibility = View.GONE
         repeatButton.visibility = View.GONE
     }
 
-    fun glideLoadDb(gif: Gif?) {
+    fun glideLoad(gif: Gif?, cache: Boolean) {
         GlideApp.with(applicationContext).asGif().load(gif!!.gifURL)
-            .listener(object : RequestListener<GifDrawable> {
+            .onlyRetrieveFromCache(cache).listener(object : RequestListener<GifDrawable> {
                 override fun onResourceReady(
                     resource: GifDrawable?,
                     model: Any?,
@@ -150,6 +151,7 @@ class MainActivity : AppCompatActivity() {
                     isFirstResource: Boolean
                 ): Boolean {
                     runOnUiThread {
+                        Log.d("MainActivity", "Resource was downloaded")
                         restoreImage()
                         bottomText.text = gif.label
                     }
@@ -168,42 +170,7 @@ class MainActivity : AppCompatActivity() {
                     return false
                 }
             })
-            .onlyRetrieveFromCache(true)
             .into(gifView)
     }
 
-    fun glideLoadNet(gif: Gif?) {
-
-        GlideApp.with(applicationContext).asGif().load(gif!!.gifURL)
-            .listener(object : RequestListener<GifDrawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<GifDrawable>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    runOnUiThread {
-                        showErrorMessage()
-
-                    }
-                    return false
-                }
-
-                override fun onResourceReady(
-                    resource: GifDrawable?,
-                    model: Any?,
-                    target: Target<GifDrawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    runOnUiThread {
-                        restoreImage()
-                        bottomText.text = gif.label
-                    }
-                    return false
-                }
-
-            })
-            .into(gifView)
-    }
 }
