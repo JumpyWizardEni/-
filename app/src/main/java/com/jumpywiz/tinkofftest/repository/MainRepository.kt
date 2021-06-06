@@ -24,12 +24,12 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
     private var currentPage: MutableMap<State, Int> =
         mutableMapOf(State.HOT to 0, State.BEST to 0, State.LATEST to 0)
 
-    suspend fun getNext(current: Int, state: State): Gif? {
+    suspend fun getNext(current: Int, latest: Int, state: State, cached: Boolean = true): Gif? {
         when (state) {
             State.RANDOM -> {
-                val cached = getCached(current, state)
-                if (cached != null) {
-                    return cached
+                val cachedData = getCached(current, state)
+                if (cachedData != null) {
+                    return cachedData
                 }
                 var data: Result? = null
                 try {
@@ -43,29 +43,43 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
             }
             State.HOT, State.BEST, State.LATEST -> {
                 if (cachedResult[state] == null) {
-                    Log.d("MainRepository", "downloadNewPage call, cachedResult[state] = null")
+                    Log.d("MainRepository", "downloadNewPage call")
                     return downloadNewPage(current, state)
                 } else {
-                    if (current >= cachedResult[state]!!.result.size) { // download new page
+                    Log.d(
+                        "MainRepository",
+                        "getNext: currentPosInPage = $currentPosInPage, size = ${cachedResult[state]!!.result.size}"
+                    )
+
+                    if (currentPosInPage[state]!! >= cachedResult[state]!!.result.size) { // download new page
                         Log.d("MainRepository", "getNext: downloadNewPage call")
 
                         return downloadNewPage(current, state)
-                    } else { //cached
+                    } else { //page downloaded
                         Log.d("MainRepository", "getNext: cashed data received")
+
                         gifDao.insertEntry(
                             TransactionHelper.resultToEntity(
-                                cachedResult[state]!!.result[current],
+                                cachedResult[state]!!.result[currentPosInPage[state]!!],
                                 current,
                                 state
                             )!!
                         )
-                        return getCached(current, state)
+                        if (current >= latest) {
+                            currentPosInPage[state] = currentPosInPage[state]!! + 1
+                        }
+                        return if (cached) {
+                            getCached(current, state)
+                        } else {
+                            TransactionHelper.resultToGif(
+                                cachedResult[state]!!.result[currentPosInPage[state]!! - 1],
+                                current
+                            )
+                        }
                     }
-
                 }
             }
         }
-
     }
 
     suspend fun getCached(current: Int, state: State): Gif? {
@@ -96,13 +110,14 @@ class MainRepository(private val gifDao: GifDao, private val retrofitService: Re
             return null
         }
         currentPage[state] = currentPage[state]!! + 1
+        currentPosInPage[state] = 1
         return TransactionHelper.resultToGif(data.result[0], current)
     }
 
     private fun getSectionName(state: State): String {
         return when (state) {
             State.RANDOM -> ""
-            State.HOT -> "hot"
+            State.HOT -> "latest" // Hot API request doesn't work, so I replaced it
             State.BEST -> "top"
             State.LATEST -> "latest"
         }

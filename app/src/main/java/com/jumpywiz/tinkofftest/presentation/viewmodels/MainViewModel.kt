@@ -19,7 +19,7 @@ class MainViewModel @Inject constructor(private val repos: MainRepository) : Vie
         stateMap[State.LATEST] = mutableListOf(1, 1)
         stateMap[State.BEST] = mutableListOf(1, 1)
         viewModelScope.launch {
-            data.value = repos.getNext(stateMap[State.RANDOM]!![0], State.RANDOM)
+            data.value = repos.getNext(stateMap[State.RANDOM]!![0], stateMap[State.RANDOM]!![0], State.RANDOM)
         }
     }
 
@@ -27,10 +27,10 @@ class MainViewModel @Inject constructor(private val repos: MainRepository) : Vie
     fun loadNext(state: State) {
         viewModelScope.launch {
             if (stateMap[state]!![0] >= stateMap[state]!![1]) {
-                data.value = repos.getNext(stateMap[state]!![0] + 1, state)
+                data.value = repos.getNext(stateMap[state]!![0] + 1, stateMap[state]!![0] + 1, state)
                 stateMap[state]!![1]++
             } else {
-                data.value = repos.getCached(stateMap[state]!![0] + 1, state)
+                data.value = repos.getCached(stateMap[state]!![0] + 1,  state)
             }
             stateMap[state]!![0]++
             Log.d(
@@ -52,24 +52,13 @@ class MainViewModel @Inject constructor(private val repos: MainRepository) : Vie
         }
     }
 
-    fun loadCurrent(state: State) {
+    fun loadCurrent(state: State, cached: Boolean = true) {
         viewModelScope.launch {
-            data.value = repos.getNext(stateMap[state]!![0], state)
+            data.value = repos.getNext(stateMap[state]!![0], stateMap[state]!![1], state, cached)
             Log.d(
                 "MainViewModel",
                 "loadCurrent: current = ${stateMap[state]!![0]}, cached = ${stateMap[state]!![1]}"
             )
-        }
-    }
-
-    fun loadCached(state: State) {
-        viewModelScope.launch {
-            data.value = repos.getCached(stateMap[state]!![0], state)
-            Log.d(
-                "MainViewModel",
-                "loadCached: current = ${stateMap[state]!![0]}, cached = ${stateMap[state]!![1]}"
-            )
-
         }
     }
 }

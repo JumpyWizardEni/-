@@ -44,6 +44,37 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Application.appComponent.inject(activity = this)
 
+        initComponents()
+        showDownload()
+        setButtonListeners()
+        setViewModelObserver()
+
+    }
+
+    fun showErrorMessage() {
+        errorText.visibility = View.VISIBLE
+        bottomText.text = ""
+        gifView.visibility = View.GONE
+        repeatButton.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+    }
+
+    fun restoreImage() {
+        errorText.visibility = View.GONE
+        gifView.visibility = View.VISIBLE
+        repeatButton.visibility = View.GONE
+        progressBar.visibility = View.GONE
+    }
+
+    fun showDownload() {
+        progressBar.visibility = View.VISIBLE
+        errorText.visibility = View.GONE
+        bottomText.text = ""
+        gifView.visibility = View.GONE
+        repeatButton.visibility = View.GONE
+    }
+
+    fun initComponents() {
         gifView = findViewById(R.id.gifView)
         bottomText = findViewById(R.id.bottomText)
         errorText = findViewById(R.id.errorText)
@@ -56,27 +87,14 @@ class MainActivity : AppCompatActivity() {
         repeatButton = findViewById(R.id.repeatButton)
         progressBar = findViewById(R.id.progressBar)
 
-        showDownload()
-
         mainViewModel =
             ViewModelProvider(
                 this,
                 viewModelFactory
             ).get(MainViewModel::class.java)
+    }
 
-        mainViewModel.getData().observe(this, Observer {
-            if (it == null) {//Some problem happened, show error message
-                Log.e("Error at MainActivity", "Null received")
-                showErrorMessage()
-            } else {//Data is successfully fetched
-                when (it.source) {
-                    Source.NET -> glideLoad(it, false)
-                    Source.DB -> glideLoad(it, true)
-                }
-                Log.d("MainActivity", "data = $it")
-                prevButton.isEnabled = it.id > 1
-            }
-        })
+    fun setButtonListeners() {
 
         hotButton.setOnClickListener {
             hotButton.isActivated = !hotButton.isActivated
@@ -145,37 +163,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         repeatButton.setOnClickListener {
-            mainViewModel.loadCurrent(currentPressed)
+            mainViewModel.loadCurrent(currentPressed, false)
             showDownload()
         }
     }
 
-    fun showErrorMessage() {
-        errorText.visibility = View.VISIBLE
-        bottomText.text = ""
-        gifView.visibility = View.GONE
-        repeatButton.visibility = View.VISIBLE
-        progressBar.visibility = View.GONE
+    fun setViewModelObserver() {
+        mainViewModel.getData().observe(this, Observer {
+            if (it == null) {//Some problem happened, show error message
+                Log.e("Error at MainActivity", "Null received")
+                showErrorMessage()
+            } else {//Data is successfully fetched
+                glideLoad(it)
+                Log.d("MainActivity", "data = $it")
+                prevButton.isEnabled = it.id > 1
+            }
+        })
     }
 
-    fun restoreImage() {
-        errorText.visibility = View.GONE
-        gifView.visibility = View.VISIBLE
-        repeatButton.visibility = View.GONE
-        progressBar.visibility = View.GONE
-    }
-
-    fun showDownload() {
-        progressBar.visibility = View.VISIBLE
-        errorText.visibility = View.GONE
-        bottomText.text = ""
-        gifView.visibility = View.GONE
-        repeatButton.visibility = View.GONE
-    }
-
-    fun glideLoad(gif: Gif?, cache: Boolean) {
+    fun glideLoad(gif: Gif?) {
         GlideApp.with(applicationContext).asGif().load(gif!!.gifURL)
-            .onlyRetrieveFromCache(cache).listener(object : RequestListener<GifDrawable> {
+            .onlyRetrieveFromCache(false).listener(object : RequestListener<GifDrawable> {
                 override fun onResourceReady(
                     resource: GifDrawable?,
                     model: Any?,
